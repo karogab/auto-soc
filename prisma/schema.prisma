@@ -26,6 +26,11 @@ enum ReactionType {
   dislike
 }
 
+enum NotificationType {
+  like
+  dislike
+}
+
 enum ReportReason {
   spam
   offensive
@@ -67,35 +72,38 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  posts           Post[]       @relation("AuthoredPosts")
-  reactions       Reaction[]
-  reports         Report[]     @relation("ReporterReports")
-  questions       Question[]
-  suggestions     Suggestion[]
-  approvedAsAdmin Post[]       @relation("ApprovedByAdmin")
-  rejectedAsAdmin Post[]       @relation("RejectedByAdmin")
+  posts                  Post[]         @relation("AuthoredPosts")
+  reactions              Reaction[]
+  reports                Report[]       @relation("ReporterReports")
+  questions              Question[]
+  suggestions            Suggestion[]
+  approvedAsAdmin        Post[]         @relation("ApprovedByAdmin")
+  rejectedAsAdmin        Post[]         @relation("RejectedByAdmin")
+  receivedNotifications  Notification[] @relation("ReceivedNotifications")
+  triggeredNotifications Notification[] @relation("TriggeredNotifications")
 
   @@index([usernameNormalized])
 }
 
 model Post {
-  id                        String     @id @default(cuid())
-  authorId                  String
-  text                      String
-  status                    PostStatus @default(pending)
-  createdAt                 DateTime   @default(now())
-  updatedAt                 DateTime   @updatedAt
-  approvedAt                DateTime?
-  approvedByAdminId         String?
-  rejectedAt                DateTime?
-  rejectedByAdminId         String?
-  pinnedOnRecommendations   Boolean    @default(false)
+  id                      String     @id @default(cuid())
+  authorId                String
+  text                    String
+  status                  PostStatus @default(pending)
+  createdAt               DateTime   @default(now())
+  updatedAt               DateTime   @updatedAt
+  approvedAt              DateTime?
+  approvedByAdminId       String?
+  rejectedAt              DateTime?
+  rejectedByAdminId       String?
+  pinnedOnRecommendations Boolean    @default(false)
 
-  author            User       @relation("AuthoredPosts", fields: [authorId], references: [id], onDelete: Cascade)
-  approvedByAdmin   User?      @relation("ApprovedByAdmin", fields: [approvedByAdminId], references: [id])
-  rejectedByAdmin   User?      @relation("RejectedByAdmin", fields: [rejectedByAdminId], references: [id])
-  reactions         Reaction[]
-  reports           Report[]
+  author          User           @relation("AuthoredPosts", fields: [authorId], references: [id], onDelete: Cascade)
+  approvedByAdmin User?          @relation("ApprovedByAdmin", fields: [approvedByAdminId], references: [id])
+  rejectedByAdmin User?          @relation("RejectedByAdmin", fields: [rejectedByAdminId], references: [id])
+  reactions       Reaction[]
+  reports         Report[]
+  notifications   Notification[]
 
   @@index([status])
   @@index([authorId])
@@ -115,6 +123,28 @@ model Reaction {
   @@unique([userId, postId])
   @@index([userId])
   @@index([postId])
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  recipientId String
+  actorId     String
+  postId      String
+  type        NotificationType
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  recipient User @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User @relation("TriggeredNotifications", fields: [actorId], references: [id], onDelete: Cascade)
+  post      Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([recipientId, actorId, postId])
+  @@index([recipientId])
+  @@index([actorId])
+  @@index([postId])
+  @@index([isRead])
+  @@index([createdAt])
 }
 
 model Report {

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { signOutAction } from "@/actions/session";
 import { UserSearch } from "@/components/user-search";
+import { getUnreadNotificationCountForUserId } from "@/server/notifications";
 
 export async function AppNav() {
   const session = await auth();
@@ -10,6 +11,7 @@ export async function AppNav() {
   }
 
   const isAdmin = session.user.role === "admin";
+  const unreadNotifications = await getUnreadNotificationCountForUserId(session.user.id);
 
   return (
     <header className="border-b border-zinc-200 bg-white/80 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/80">
@@ -17,6 +19,9 @@ export async function AppNav() {
         <nav className="flex flex-wrap items-center gap-4 text-sm font-medium">
           <Link className="text-zinc-700 hover:text-zinc-950 dark:text-zinc-200 dark:hover:text-white" href="/recommendations">
             Recommendations
+          </Link>
+          <Link className="text-zinc-700 hover:text-zinc-950 dark:text-zinc-200 dark:hover:text-white" href="/notifications">
+            Notifications{unreadNotifications > 0 ? ` (${unreadNotifications})` : ""}
           </Link>
           <Link className="text-zinc-700 hover:text-zinc-950 dark:text-zinc-200 dark:hover:text-white" href="/account">
             My Account

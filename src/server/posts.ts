@@ -1,6 +1,7 @@
 import { PostStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { createPostSchema } from "@/lib/validators";
+import { deleteNotificationsForPost } from "@/server/notification-sql";
 import { getLikeDislikeCountsForPosts } from "@/server/users";
 
 /** Thrown when DB is missing `Post.pinnedOnRecommendations` (migration not applied). */
@@ -302,8 +303,11 @@ export async function setPostStatusRejectedOrDeleted(
     await prisma.post.delete({ where: { id: postId } });
     return;
   }
-  return prisma.post.update({
-    where: { id: postId },
-    data: { status: PostStatus.deleted },
+  return prisma.$transaction(async (tx) => {
+    await deleteNotificationsForPost(tx, postId);
+    return tx.post.update({
+      where: { id: postId },
+      data: { status: PostStatus.deleted },
+    });
   });
 }

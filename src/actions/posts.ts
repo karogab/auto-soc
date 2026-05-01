@@ -43,6 +43,8 @@ export async function reactToPostAction(postId: string, type: "like" | "dislike"
       select: { author: { select: { username: true } } },
     });
     revalidatePath("/recommendations");
+    revalidatePath("/notifications");
+    revalidatePath("/recommendations", "layout");
     if (author?.author.username) {
       revalidatePath(`/users/${encodeURIComponent(author.author.username)}`);
     }

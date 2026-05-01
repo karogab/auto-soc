@@ -96,6 +96,8 @@ export const moderationPostIdSchema = z.object({
   postId: z.string().min(1),
 });
 
+export const notificationIdSchema = z.string().min(1);
+
 export const adminUserIdSchema = z.object({
   userId: z.string().min(1),
 });
