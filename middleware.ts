@@ -24,7 +24,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req, secret });
+  const usesSecureCookies = req.nextUrl.protocol === "https:";
+  const token = await getToken({ req, secret, secureCookie: usesSecureCookies });
 
   if (pathname.startsWith("/admin")) {
     if (!token || token.role !== "admin") {
