@@ -1,7 +1,6 @@
 import { PostStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { createPostSchema } from "@/lib/validators";
-import { deleteNotificationsForPost } from "@/server/notification-sql";
 import { getLikeDislikeCountsForPosts } from "@/server/users";
 
 /** Thrown when DB is missing `Post.pinnedOnRecommendations` (migration not applied). */
@@ -40,7 +39,7 @@ export async function createPendingPost(authorId: string, input: unknown) {
 
 export async function listMyPosts(authorId: string) {
   return prisma.post.findMany({
-    where: { authorId },
+    where: { authorId, NOT: { status: PostStatus.deleted } },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -251,7 +250,11 @@ export async function adminDeletePostById(postId: string) {
 
 export async function listPostsForAdminSearch(textQuery: string | undefined, take = 80) {
   const q = textQuery?.trim() ?? "";
-  const where = q.length >= 1 ? { text: { contains: q, mode: "insensitive" as const } } : {};
+  const notDeleted = { NOT: { status: PostStatus.deleted } } as const;
+  const where =
+    q.length >= 1
+      ? { AND: [{ text: { contains: q, mode: "insensitive" as const } }, notDeleted] }
+      : notDeleted;
   return prisma.post.findMany({
     where,
     take,
@@ -266,7 +269,7 @@ export async function listPostsForAdminSearch(textQuery: string | undefined, tak
 
 export async function listPostsForAdminByAuthor(authorId: string) {
   const posts = await prisma.post.findMany({
-    where: { authorId },
+    where: { authorId, NOT: { status: PostStatus.deleted } },
     orderBy: { createdAt: "desc" },
   });
   const ids = posts.map((p) => p.id);
@@ -288,9 +291,10 @@ export async function listPostsForAdminByAuthor(authorId: string) {
   }));
 }
 
+/** Removes an approved post from the feed and deletes the row (reactions, reports, notifications cascade). */
 export async function setPostStatusRejectedOrDeleted(
   postId: string,
-  status: "rejected" | "deleted",
+  _status: "rejected" | "deleted",
   _adminId: string,
 ) {
   const post = await prisma.post.findFirst({
@@ -299,15 +303,5 @@ export async function setPostStatusRejectedOrDeleted(
   if (!post) {
     throw new Error("NOT_FOUND");
   }
-  if (status === PostStatus.rejected) {
-    await prisma.post.delete({ where: { id: postId } });
-    return;
-  }
-  return prisma.$transaction(async (tx) => {
-    await deleteNotificationsForPost(tx, postId);
-    return tx.post.update({
-      where: { id: postId },
-      data: { status: PostStatus.deleted },
-    });
-  });
+  await prisma.post.delete({ where: { id: postId } });
 }
