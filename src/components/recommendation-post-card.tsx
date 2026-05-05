@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { PostText } from "@/components/post-text";
 import { ReactionButtons } from "@/components/reaction-buttons";
@@ -28,6 +29,8 @@ type RecommendationPostCardProps = {
   showPinnedLabel?: boolean;
   /** Pin/Unpin only on `/recommendations`; keep false on user profiles. */
   canPinOnRecommendationsFeed?: boolean;
+  /** Rendered inside the same bordered card below the post (e.g. comments). */
+  children?: ReactNode;
 };
 
 export function RecommendationPostCard({
@@ -36,6 +39,7 @@ export function RecommendationPostCard({
   isAdmin,
   showPinnedLabel = false,
   canPinOnRecommendationsFeed = false,
+  children,
 }: RecommendationPostCardProps) {
   const when = post.approvedAt ?? post.createdAt;
 
@@ -73,6 +77,7 @@ export function RecommendationPostCard({
           </div>
         </div>
       </div>
+      {children ? <div className="mt-4 space-y-3">{children}</div> : null}
     </div>
   );
 }

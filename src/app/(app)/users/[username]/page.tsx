@@ -2,11 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/permissions";
 import {
+  countApprovedPostsForAuthor,
   getCurrentUserReactionsForPosts,
   listApprovedPostsForAuthor,
   type FeedSortMode,
 } from "@/server/posts";
 import {
+  countApprovedCommentsForAuthor,
   getCurrentUserReactionsForComments,
   groupCommentsByPostId,
   listCommentsForAuthor,
@@ -14,10 +16,11 @@ import {
   type CommentForFeed,
 } from "@/server/comments";
 import { getUserByUsernameNormalizedForPublic } from "@/server/users";
-import { VerifiedBadge } from "@/components/verified-badge";
-import { FeedSortTabs } from "@/components/feed-sort-tabs";
-import { RecommendationPostCard } from "@/components/recommendation-post-card";
 import { CommentList } from "@/components/comment-list";
+import { FeedSortTabs } from "@/components/feed-sort-tabs";
+import { ProfileStatsAvatar } from "@/components/profile-stats-avatar";
+import { RecommendationPostCard } from "@/components/recommendation-post-card";
+import { VerifiedBadge } from "@/components/verified-badge";
 import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 
 type PageProps = {
@@ -47,7 +50,11 @@ export default async function PublicUserProfilePage({ params, searchParams }: Pa
     notFound();
   }
 
-  const posts = await listApprovedPostsForAuthor(user.id, { sort });
+  const [posts, approvedPostCount, approvedCommentCount] = await Promise.all([
+    listApprovedPostsForAuthor(user.id, { sort }),
+    countApprovedPostsForAuthor(user.id),
+    countApprovedCommentsForAuthor(user.id),
+  ]);
   const postIds = posts.map((p) => p.id);
   const reactionMap = await getCurrentUserReactionsForPosts(session.user.id, postIds);
   const isAdmin = session.user.role === "admin";
@@ -65,14 +72,22 @@ export default async function PublicUserProfilePage({ params, searchParams }: Pa
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          {user.firstName} {user.lastName}
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          @{user.username}
-          {user.isVerified ? <VerifiedBadge className="ml-1.5" aria-label="Verified" /> : null}
-        </p>
+      <header className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="order-1 shrink-0 sm:order-2">
+          <ProfileStatsAvatar
+            approvedPostCount={approvedPostCount}
+            approvedCommentCount={approvedCommentCount}
+          />
+        </div>
+        <div className="order-2 min-w-0 w-full text-center sm:order-1 sm:w-auto sm:flex-1 sm:text-left">
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            {user.firstName} {user.lastName}
+          </h1>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            @{user.username}
+            {user.isVerified ? <VerifiedBadge className="ml-1.5" aria-label="Verified" /> : null}
+          </p>
+        </div>
       </header>
       <section className="space-y-4">
         <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">Posts</h2>
@@ -82,20 +97,21 @@ export default async function PublicUserProfilePage({ params, searchParams }: Pa
         ) : (
           <ul className="space-y-4">
             {posts.map((post) => (
-              <li key={post.id} className="space-y-3">
+              <li key={post.id}>
                 <RecommendationPostCard
                   post={post}
                   myReaction={reactionMap.get(post.id) ?? null}
                   isAdmin={isAdmin}
                   canPinOnRecommendationsFeed={false}
-                />
-                <CommentList
-                  postId={post.id}
-                  postAuthorUsername={post.author.username}
-                  comments={(commentsByPost.get(post.id) ?? []) as CommentForFeed[]}
-                  myReactions={commentReactionMap}
-                  canPin={isAdmin || session.user.id === post.authorId}
-                />
+                >
+                  <CommentList
+                    postId={post.id}
+                    postAuthorUsername={post.author.username}
+                    comments={(commentsByPost.get(post.id) ?? []) as CommentForFeed[]}
+                    myReactions={commentReactionMap}
+                    canPin={isAdmin || session.user.id === post.authorId}
+                  />
+                </RecommendationPostCard>
               </li>
             ))}
           </ul>

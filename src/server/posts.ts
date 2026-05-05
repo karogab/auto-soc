@@ -136,6 +136,12 @@ export async function listApprovedPostsForAuthor(authorId: string, options?: { s
   return enriched;
 }
 
+export async function countApprovedPostsForAuthor(authorId: string): Promise<number> {
+  return prisma.post.count({
+    where: { authorId, status: PostStatus.approved },
+  });
+}
+
 export async function setApprovedPostPinnedOnRecommendations(postId: string, pinned: boolean) {
   const post = await prisma.post.findFirst({
     where: { id: postId, status: PostStatus.approved },

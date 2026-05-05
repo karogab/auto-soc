@@ -57,14 +57,13 @@ export default async function RecommendationsPage({ searchParams }: PageProps) {
   const popularHref = buildSortHref("/recommendations?sort=popular", selectedPostId ?? undefined);
 
   const renderPostBlock = (post: FeedPost, opts?: { showPinnedLabel?: boolean }) => (
-    <div className="space-y-3">
-      <RecommendationPostCard
-        post={post}
-        myReaction={reactionMap.get(post.id) ?? null}
-        isAdmin={isAdmin}
-        showPinnedLabel={opts?.showPinnedLabel ?? false}
-        canPinOnRecommendationsFeed={isAdmin}
-      />
+    <RecommendationPostCard
+      post={post}
+      myReaction={reactionMap.get(post.id) ?? null}
+      isAdmin={isAdmin}
+      showPinnedLabel={opts?.showPinnedLabel ?? false}
+      canPinOnRecommendationsFeed={isAdmin}
+    >
       <CommentList
         postId={post.id}
         postAuthorUsername={post.author.username}
@@ -72,7 +71,7 @@ export default async function RecommendationsPage({ searchParams }: PageProps) {
         myReactions={commentReactionMap}
         canPin={isAdmin || session.user.id === post.authorId}
       />
-    </div>
+    </RecommendationPostCard>
   );
 
   return (

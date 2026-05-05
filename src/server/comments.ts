@@ -86,6 +86,15 @@ export async function createComment(authorId: string, input: unknown) {
   });
 }
 
+export async function countApprovedCommentsForAuthor(authorId: string): Promise<number> {
+  return prisma.comment.count({
+    where: {
+      authorId,
+      post: { status: PostStatus.approved },
+    },
+  });
+}
+
 async function getLikeDislikeCountsForComments(commentIds: string[]) {
   const map = new Map<string, { likes: number; dislikes: number }>();
   for (const id of commentIds) {

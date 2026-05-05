@@ -38,7 +38,7 @@ export function CommentList({
   canPin,
 }: CommentListProps) {
   return (
-    <div className="mt-4 space-y-3">
+    <div className="space-y-3">
       <CommentForm postId={postId} placeholder="Write a comment..." submitLabel="Comment" />
       {comments.length === 0 ? null : (
         <ul className="space-y-3">
