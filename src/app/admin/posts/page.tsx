@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listPostsForAdminSearch } from "@/server/posts";
 import { PostText } from "@/components/post-text";
@@ -52,7 +53,7 @@ export default async function AdminPostsPage({ searchParams }: PageProps) {
               {posts.map((p) => (
                 <tr key={p.id} className="border-t border-zinc-100 align-top dark:border-zinc-800">
                   <td className="whitespace-nowrap p-2 text-xs text-zinc-500">
-                    {p.createdAt.toLocaleString(undefined, { dateStyle: "short", timeStyle: "short" })}
+                    {formatDateTimeUtcPlus4(p.createdAt)}
                   </td>
                   <td className="p-2">
                     <div className="font-medium text-zinc-900 dark:text-zinc-100">{p.author.username}</div>

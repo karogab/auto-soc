@@ -1,3 +1,4 @@
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listPendingPostsForModeration } from "@/server/posts";
 import { PostText } from "@/components/post-text";
@@ -20,7 +21,7 @@ export default async function AdminModerationPage() {
                 @{p.author.username} · {p.author.firstName} {p.author.lastName} ·{" "}
                 <span className="font-mono text-xs">{p.author.email}</span>
               </p>
-              <p className="mt-1 text-xs text-zinc-500">{p.createdAt.toLocaleString()}</p>
+              <p className="mt-1 text-xs text-zinc-500">{formatDateTimeUtcPlus4(p.createdAt)}</p>
               <div className="mt-2">
                 <PostText text={p.text} />
               </div>

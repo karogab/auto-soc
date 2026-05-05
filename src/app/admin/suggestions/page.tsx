@@ -1,3 +1,4 @@
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listSuggestionsForAdmin } from "@/server/suggestions";
 import { updateSuggestionStatusAction } from "@/actions/admin";
@@ -30,7 +31,7 @@ export default async function AdminSuggestionsPage() {
                 <td className="p-2 text-xs">{s.user.email}</td>
                 <td className="max-w-md p-2 text-xs">{s.message}</td>
                 <td className="p-2">{s.status}</td>
-                <td className="p-2 text-xs">{s.createdAt.toLocaleString()}</td>
+                <td className="p-2 text-xs">{formatDateTimeUtcPlus4(s.createdAt)}</td>
                 <td className="p-2">
                   <form action={updateSuggestionStatusAction} className="flex flex-col gap-1">
                     <input type="hidden" name="suggestionId" value={s.id} />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listUsersForAdmin } from "@/server/users";
 
@@ -52,7 +53,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps) {
                 <td className="p-2">{u.role}</td>
                 <td className="p-2">{u.isVerified ? "yes" : "no"}</td>
                 <td className="p-2">{u._count.posts}</td>
-                <td className="p-2 text-xs text-zinc-500">{u.createdAt.toLocaleDateString()}</td>
+                <td className="p-2 text-xs text-zinc-500">{formatDateTimeUtcPlus4(u.createdAt)}</td>
                 <td className="p-2">
                   <Link href={`/admin/users/${u.id}`} className="text-blue-600 underline dark:text-blue-400">
                     Open

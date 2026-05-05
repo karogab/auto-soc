@@ -1,3 +1,4 @@
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listQuestionsForAdmin } from "@/server/questions";
 import { updateQuestionStatusAction } from "@/actions/admin";
@@ -32,7 +33,7 @@ export default async function AdminQuestionsPage() {
                 <td className="p-2">{q.subject ?? "—"}</td>
                 <td className="max-w-xs p-2 text-xs">{q.message}</td>
                 <td className="p-2">{q.status}</td>
-                <td className="p-2 text-xs">{q.createdAt.toLocaleString()}</td>
+                <td className="p-2 text-xs">{formatDateTimeUtcPlus4(q.createdAt)}</td>
                 <td className="p-2">
                   <form action={updateQuestionStatusAction} className="flex flex-col gap-1">
                     <input type="hidden" name="questionId" value={q.id} />

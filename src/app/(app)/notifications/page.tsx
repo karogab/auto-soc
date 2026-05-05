@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireSession } from "@/lib/permissions";
 import { getMyNotifications, getUnreadNotificationCount } from "@/server/notifications";
 import { VerifiedBadge } from "@/components/verified-badge";
@@ -38,10 +39,7 @@ export default async function NotificationsPage() {
         <ul className="space-y-3">
           {items.map((n) => {
             const verb = n.type === "like" ? "liked" : "disliked";
-            const when = n.createdAt.toLocaleString(undefined, {
-              dateStyle: "medium",
-              timeStyle: "short",
-            });
+            const when = formatDateTimeUtcPlus4(n.createdAt);
             return (
               <li
                 key={n.id}

@@ -1,3 +1,4 @@
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import { listReportsForAdmin } from "@/server/reports";
 import { updateReportStatusAction } from "@/actions/admin";
@@ -43,7 +44,7 @@ export default async function AdminReportsPage() {
                 <td className="p-2">{r.reason}</td>
                 <td className="max-w-[8rem] p-2 text-xs">{r.comment ?? "—"}</td>
                 <td className="p-2">{r.status}</td>
-                <td className="p-2 text-xs">{r.createdAt.toLocaleString()}</td>
+                <td className="p-2 text-xs">{formatDateTimeUtcPlus4(r.createdAt)}</td>
                 <td className="space-y-2 p-2 align-top">
                   <form action={updateReportStatusAction} className="flex flex-col gap-1">
                     <input type="hidden" name="reportId" value={r.id} />

@@ -1,3 +1,4 @@
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { PostText } from "@/components/post-text";
 import { ReactionButtons } from "@/components/reaction-buttons";
 import { ReportPostButton } from "@/components/report-post-button";
@@ -53,9 +54,7 @@ export function RecommendationPostCard({
             </span>
             <span>@{post.author.username}</span>
             {post.author.isVerified ? <VerifiedBadge aria-label="Verified" /> : null}
-            <span className="text-xs text-zinc-500">
-              {when.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}
-            </span>
+            <span className="text-xs text-zinc-500">{formatDateTimeUtcPlus4(when)}</span>
           </div>
           <PostText text={post.text} />
           <ReactionButtons

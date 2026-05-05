@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { requireAdminSession } from "@/lib/permissions";
 import {
   getUserDetailForAdmin,
@@ -54,7 +55,7 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
           </div>
           <div>
             <dt className="text-zinc-500">Joined</dt>
-            <dd>{user.createdAt.toLocaleString()}</dd>
+            <dd>{formatDateTimeUtcPlus4(user.createdAt)}</dd>
           </div>
         </dl>
         <div className="mt-4">
@@ -96,8 +97,8 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
                   <td className="p-2">{p.likeCount}</td>
                   <td className="p-2">{p.dislikeCount}</td>
                   <td className="p-2">{p.reportCount}</td>
-                  <td className="p-2 text-xs">{p.createdAt.toLocaleString()}</td>
-                  <td className="p-2 text-xs">{p.approvedAt ? p.approvedAt.toLocaleString() : "—"}</td>
+                  <td className="p-2 text-xs">{formatDateTimeUtcPlus4(p.createdAt)}</td>
+                  <td className="p-2 text-xs">{p.approvedAt ? formatDateTimeUtcPlus4(p.approvedAt) : "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -121,7 +122,7 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
               {reactions.map((r) => (
                 <tr key={r.id} className="border-t border-zinc-100 dark:border-zinc-800">
                   <td className="p-2">{r.type}</td>
-                  <td className="p-2 text-xs">{r.createdAt.toLocaleString()}</td>
+                  <td className="p-2 text-xs">{formatDateTimeUtcPlus4(r.createdAt)}</td>
                   <td className="p-2">
                     @{r.post.author.username} ({r.post.author.firstName} {r.post.author.lastName})
                   </td>

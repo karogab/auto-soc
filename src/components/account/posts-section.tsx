@@ -1,5 +1,6 @@
 "use client";
 
+import { formatDateTimeUtcPlus4 } from "@/lib/datetime";
 import { PostText } from "@/components/post-text";
 import { CreatePostForm } from "@/components/account/create-post-form";
 import { DeleteMyPostForm } from "@/components/delete-my-post-form";
@@ -28,7 +29,7 @@ export function PostsSection({ myPosts }: { myPosts: AccountMyPost[] }) {
                 <PostText text={p.text} />
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                   <p className="text-xs text-zinc-500">
-                    Status: {p.status} · {new Date(p.createdAt).toLocaleString()}
+                    Status: {p.status} · {formatDateTimeUtcPlus4(p.createdAt)}
                   </p>
                   <DeleteMyPostForm postId={p.id} />
                 </div>
