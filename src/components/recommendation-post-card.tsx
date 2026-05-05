@@ -53,11 +53,13 @@ export function RecommendationPostCard({
                 Pinned
               </span>
             ) : null}
-            <span className="font-medium text-zinc-900 dark:text-zinc-100">
+            <span className="shrink-0 font-medium text-zinc-900 dark:text-zinc-100">
+              @{post.author.username}
+            </span>
+            {post.author.isVerified ? <VerifiedBadge aria-label="Verified" /> : null}
+            <span className="min-w-0 break-words">
               {post.author.firstName} {post.author.lastName}
             </span>
-            <span>@{post.author.username}</span>
-            {post.author.isVerified ? <VerifiedBadge aria-label="Verified" /> : null}
             <span className="text-xs text-zinc-500">{formatDateTimeUtcPlus4(when)}</span>
           </div>
           <PostText text={post.text} />
