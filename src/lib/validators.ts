@@ -96,6 +96,37 @@ export const moderationPostIdSchema = z.object({
   postId: z.string().min(1),
 });
 
+const commentMax = postMax;
+
+export const createCommentSchema = z.object({
+  postId: z.string().min(1),
+  parentCommentId: z
+    .string()
+    .min(1)
+    .optional()
+    .transform((v) => (v === "" ? undefined : v)),
+  text: z
+    .string()
+    .trim()
+    .min(1, "Comment cannot be empty")
+    .max(commentMax, `Comment must be at most ${commentMax} characters`),
+});
+
+export const commentReactionSchema = z.object({
+  commentId: z.string().min(1),
+  type: z.enum(["like", "dislike"]),
+});
+
+export const createCommentReportSchema = z.object({
+  commentId: z.string().min(1),
+  reason: reportReasonSchema,
+  comment: z.string().trim().max(2000).optional().transform((v) => (v === "" ? undefined : v)),
+});
+
+export const commentIdSchema = z.object({
+  commentId: z.string().min(1),
+});
+
 export const notificationIdSchema = z.string().min(1);
 
 export const adminUserIdSchema = z.object({

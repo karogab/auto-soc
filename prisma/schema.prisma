@@ -72,15 +72,18 @@ model User {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
-  posts                  Post[]         @relation("AuthoredPosts")
+  posts                  Post[]            @relation("AuthoredPosts")
   reactions              Reaction[]
-  reports                Report[]       @relation("ReporterReports")
+  reports                Report[]          @relation("ReporterReports")
   questions              Question[]
   suggestions            Suggestion[]
-  approvedAsAdmin        Post[]         @relation("ApprovedByAdmin")
-  rejectedAsAdmin        Post[]         @relation("RejectedByAdmin")
-  receivedNotifications  Notification[] @relation("ReceivedNotifications")
-  triggeredNotifications Notification[] @relation("TriggeredNotifications")
+  approvedAsAdmin        Post[]            @relation("ApprovedByAdmin")
+  rejectedAsAdmin        Post[]            @relation("RejectedByAdmin")
+  receivedNotifications  Notification[]    @relation("ReceivedNotifications")
+  triggeredNotifications Notification[]    @relation("TriggeredNotifications")
+  comments               Comment[]         @relation("AuthoredComments")
+  commentReactions       CommentReaction[]
+  commentReports         CommentReport[]   @relation("ReporterCommentReports")
 
   @@index([usernameNormalized])
 }
@@ -104,6 +107,7 @@ model Post {
   reactions       Reaction[]
   reports         Report[]
   notifications   Notification[]
+  comments        Comment[]
 
   @@index([status])
   @@index([authorId])
@@ -188,5 +192,60 @@ model Suggestion {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([status])
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  postId          String
+  authorId        String
+  parentCommentId String?
+  text            String
+  pinnedOnPost    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  post     Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author   User              @relation("AuthoredComments", fields: [authorId], references: [id], onDelete: Cascade)
+  parent   Comment?          @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies  Comment[]         @relation("CommentReplies")
+  reactions CommentReaction[]
+  reports   CommentReport[]
+
+  @@index([postId])
+  @@index([authorId])
+  @@index([parentCommentId])
+}
+
+model CommentReaction {
+  id        String       @id @default(cuid())
+  userId    String
+  commentId String
+  type      ReactionType
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+  @@index([userId])
+  @@index([commentId])
+}
+
+model CommentReport {
+  id         String       @id @default(cuid())
+  commentId  String
+  reporterId String
+  reason     ReportReason
+  comment    String?
+  status     ReportStatus @default(new)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  commentRef Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  reporter   User    @relation("ReporterCommentReports", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, reporterId])
   @@index([status])
 }

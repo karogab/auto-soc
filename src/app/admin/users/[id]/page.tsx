@@ -7,6 +7,7 @@ import {
   listReactionHistoryForAdmin,
 } from "@/server/users";
 import { listPostsForAdminByAuthor } from "@/server/posts";
+import { listCommentsForAuthor } from "@/server/comments";
 import { PostText } from "@/components/post-text";
 import { VerificationToggle } from "@/components/admin-verification-toggle";
 import { AdminDeleteUserForm } from "@/components/admin-delete-user-form";
@@ -26,6 +27,7 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
   }
   const posts = await listPostsForAdminByAuthor(id);
   const reactions = await listReactionHistoryForAdmin(id);
+  const comments = await listCommentsForAuthor(id);
 
   return (
     <div className="space-y-8">
@@ -132,6 +134,48 @@ export default async function AdminUserDetailPage({ params, searchParams }: Page
                   </td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-lg font-medium">Comments</h2>
+        <div className="mt-2 overflow-x-auto rounded border border-zinc-200 dark:border-zinc-800">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-zinc-50 dark:bg-zinc-900">
+              <tr>
+                <th className="p-2">When</th>
+                <th className="p-2">Target</th>
+                <th className="p-2">Text</th>
+                <th className="p-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {comments.map((c) => {
+                const target = c.parent?.author.username ?? c.post.author.username;
+                return (
+                  <tr key={c.id} className="border-t border-zinc-100 align-top dark:border-zinc-800">
+                    <td className="whitespace-nowrap p-2 text-xs text-zinc-500">
+                      {formatDateTimeUtcPlus4(c.createdAt)}
+                    </td>
+                    <td className="p-2">@{target}</td>
+                    <td className="max-w-md p-2">
+                      <div className="max-h-36 overflow-y-auto text-zinc-800 dark:text-zinc-200">
+                        {c.text.length > 200 ? `${c.text.slice(0, 200)}…` : c.text}
+                      </div>
+                    </td>
+                    <td className="whitespace-nowrap p-2">
+                      <Link
+                        href={`/recommendations?post=${encodeURIComponent(c.postId)}`}
+                        className="text-blue-600 underline dark:text-blue-400"
+                      >
+                        Open
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
